@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1c2117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="サバゲーチーム">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>サバゲー貸切 チーム分けアプリ</title>
+<style>
+:root{
+  --bg:#1c2117; --card:#283020; --card2:#323b28; --line:#44503a;
+  --text:#eef0e4; --sub:#aab49a; --accent:#d2bd6a; --accent-ink:#1c2117;
+  --danger:#e0645a; --ok:#6fc37f;
+  --t0:#d9534f; --t1:#3f82e0; --t2:#45a862; --t3:#d9a520;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;line-height:1.5}
+body{padding-bottom:80px}
+header{padding:calc(18px + env(safe-area-inset-top)) 16px 10px;background:
+  repeating-linear-gradient(135deg,#222a1b 0 14px,#1f2618 14px 28px);border-bottom:2px solid var(--accent)}
+header h1{margin:0;font-size:20px;letter-spacing:.04em}
+header p{margin:2px 0 0;font-size:12px;color:var(--sub)}
+nav{display:flex;position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav button{flex:1;padding:13px 4px;background:none;border:0;border-bottom:3px solid transparent;color:var(--sub);font-size:14px;font-weight:600;cursor:pointer}
+nav button.on{color:var(--accent);border-bottom-color:var(--accent)}
+main{max-width:720px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.card h2,.card h3{margin:0 0 10px;font-size:15px}
+.hint{font-size:12px;color:var(--sub);margin:4px 0 0}
+input,textarea,select{width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);background:#1a2015;color:var(--text);font-size:16px;font-family:inherit}
+textarea{min-height:90px;resize:vertical}
+label{display:block;font-size:12px;color:var(--sub);margin:8px 0 3px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+button{font-family:inherit}
+.btn{padding:11px 14px;border-radius:9px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-size:14px;font-weight:600;cursor:pointer}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:var(--danger);border-color:#6a3b37}
+.btn.armed{background:var(--danger);color:#fff;border-color:var(--danger)}
+.btn.sm{padding:6px 10px;font-size:12px;border-radius:7px}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.btn.full{width:100%}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1}
+.mrow{padding:10px 0;border-top:1px solid var(--line)}
+.mrow:first-of-type{border-top:0}
+.mname{font-weight:700;font-size:16px}
+.sub{font-size:12px;color:var(--sub)}
+.badge{display:inline-block;font-size:11px;padding:1px 8px;border-radius:99px;background:var(--card2);border:1px solid var(--line);color:var(--accent);margin-left:6px;vertical-align:middle;font-weight:600}
+.badge.beg{color:#9fd8ff}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:7px 12px;border-radius:99px;border:1px solid var(--line);background:#1a2015;color:var(--sub);font-size:14px;cursor:pointer}
+.chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{flex:1;padding:9px;background:#1a2015;color:var(--sub);border:0;font-size:14px;cursor:pointer;font-weight:600}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+input[type=range]{padding:0;accent-color:var(--accent)}
+.rl{display:flex;justify-content:space-between;font-size:11px;color:var(--sub)}
+.team{border-radius:12px;overflow:hidden;border:1px solid var(--line);margin-bottom:12px;background:var(--card)}
+.team .th{padding:10px 14px;font-weight:800;font-size:16px;color:#fff;display:flex;justify-content:space-between;align-items:baseline}
+.team .th small{font-weight:500;font-size:12px;opacity:.92}
+.team .tb{padding:10px;display:flex;flex-wrap:wrap;gap:6px}
+.pm{padding:8px 12px;border-radius:9px;background:var(--card2);border:1px solid var(--line);cursor:pointer;text-align:left;color:var(--text);font-size:14px;line-height:1.3}
+.pm span{display:block;font-size:11px;color:var(--sub)}
+.pm.beg{border-left:4px solid #9fd8ff}
+.rank{width:100%;border-collapse:collapse;font-size:13px}
+.rank th,.rank td{padding:7px 4px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.rank th:first-child,.rank td:first-child{text-align:left}
+.rank th{color:var(--sub);font-weight:600;font-size:11px}
+.scroll{overflow-x:auto}
+.hist{padding:10px 0;border-top:1px solid var(--line)}
+.hist:first-of-type{border-top:0}
+.hl{font-size:13px;margin:3px 0}
+.hl b{display:inline-block;min-width:68px}
+.win{color:var(--accent)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);padding:10px 18px;border-radius:99px;font-weight:700;font-size:14px;box-shadow:0 4px 16px #0008;z-index:20}
+.empty{text-align:center;color:var(--sub);padding:18px 0;font-size:14px}
+.warn{background:#3d3420;border:1px solid #6b5a22;color:#ecd98f;padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎯 サバゲー貸切 チーム分け</h1>
+  <p>メンバー・経験数・勝敗を登録して、バランスの取れたチームを自動編成</p>
+</header>
+<nav id="nav"></nav>
+<main id="main"></main>
+<div id="toast-wrap"></div>
+
+<script>
+(function(){
+const KEY='sabage-team-balance-v1';
+const TN=['赤チーム','青チーム','緑チーム','黄チーム'];
+const TC=['var(--t0)','var(--t1)','var(--t2)','var(--t3)'];
+let storageOk=true;
+
+function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r);}catch(e){storageOk=false;}return null;}
+const def=()=>({members:[],history:[],teams:null,teamCount:2,weight:0.5,begMax:3,nextId:1});
+let S=Object.assign(def(),load()||{});
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){storageOk=false;}}
+
+const ui={tab:'teams',editing:null,arm:null,sort:'wins',toast:'',exportText:'',importText:'',showBulk:false};
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const byId=id=>S.members.find(m=>m.id===id);
+const rand=n=>Math.floor(Math.random()*n);
+const num=(v,d=0)=>{const n=parseInt(v,10);return isNaN(n)||n<0?d:n;};
+
+/* ---------- stats / rating ---------- */
+function stats(m){
+  let g=0,w=0,l=0,d=0;
+  for(const h of S.history){
+    for(let t=0;t<h.teams.length;t++){
+      if(h.teams[t].includes(m.id)){
+        g++;
+        if(h.winner===-1)d++;
+        else if(h.winner===t)w++;
+        else l++;
+      }
+    }
+  }
+  return {g:g+m.w0+m.l0,w:w+m.w0,l:l+m.l0,d};
+}
+function rf(m){
+  const s=stats(m);
+  const wr=(s.w+2)/(s.w+s.l+4);                       // 勝率(少数試合は50%寄りに補正)
+  const e=Math.min(1,Math.log(1+m.exp)/Math.log(51)); // 経験数(50回で上限)
+  return 100*(S.weight*e+(1-S.weight)*wr);
+}
+const isBeg=m=>m.exp<=S.begMax;
+
+/* ---------- team balancing ---------- */
+function split(ids,n){
+  const P=ids.map(id=>{const m=byId(id);return {id,r:rf(m),b:isBeg(m)?1:0};});
+  const mean=P.reduce((a,p)=>a+p.r,0)/P.length;
+  const maxSize=Math.ceil(P.length/n);
+  const begMean=P.reduce((a,p)=>a+p.b,0)/n;
+  function cost(T){
+    const mt=T.map(t=>t.reduce((a,p)=>a+p.r,0)+(maxSize-t.length)*mean);
+    const avg=mt.reduce((a,b)=>a+b,0)/n;
+    let c=0;
+    for(const x of mt)c+=(x-avg)**2;
+    for(const t of T){const b=t.reduce((a,p)=>a+p.b,0);c+=30*(b-begMean)**2;}
+    return c;
+  }
+  let best=null,bc=Infinity;
+  for(let k=0;k<10;k++){
+    const sorted=P.map(p=>({p,k:p.r+(Math.random()-.5)*12})).sort((a,b)=>b.k-a.k).map(x=>x.p);
+    const T=Array.from({length:n},()=>[]);
+    sorted.forEach((p,i)=>{const row=Math.floor(i/n),col=i%n;T[row%2===0?col:n-1-col].push(p);});
+    let c=cost(T);
+    for(let i=0;i<1500;i++){
+      const a=rand(n),b=rand(n);
+      if(a===b||!T[a].length||!T[b].length)continue;
+      const x=rand(T[a].length),y=rand(T[b].length);
+      [T[a][x],T[b][y]]=[T[b][y],T[a][x]];
+      const c2=cost(T);
+      if(c2<=c)c=c2;else[T[a][x],T[b][y]]=[T[b][y],T[a][x]];
+    }
+    if(c<bc){bc=c;best=T.map(t=>t.map(p=>p.id));}
+  }
+  return best;
+}
+
+/* ---------- render ---------- */
+function render(){
+  const tabs=[['teams','チーム分け'],['members','メンバー'],['record','戦績'],['data','データ']];
+  $('#nav').innerHTML=tabs.map(([k,l])=>`<button class="${ui.tab===k?'on':''}" data-act="tab" data-v="${k}">${l}</button>`).join('');
+  const v={teams:vTeams,members:vMembers,record:vRecord,data:vData}[ui.tab]();
+  $('#main').innerHTML=(storageOk?'':'<div class="warn">この環境では自動保存が使えません。「データ」タブのバックアップで保存してください。</div>')+v;
+  $('#toast-wrap').innerHTML=ui.toast?`<div class="toast">${esc(ui.toast)}</div>`:'';
+}
+function toast(t){ui.toast=t;render();setTimeout(()=>{ui.toast='';render();},1800);}
+
+/* --- members tab --- */
+function vMembers(){
+  let h=`<div class="card"><h3>メンバー登録</h3>
+  <label>名前</label><input id="n-name" placeholder="例：山田" autocomplete="off">
+  <div class="grid3">
+    <div><label>サバゲー経験数(回)</label><input id="n-exp" type="number" inputmode="numeric" min="0" value="0"></div>
+    <div><label>過去の勝ち</label><input id="n-w" type="number" inputmode="numeric" min="0" value="0"></div>
+    <div><label>過去の負け</label><input id="n-l" type="number" inputmode="numeric" min="0" value="0"></div>
+  </div>
+  <div class="row" style="margin-top:10px"><button class="btn pri" data-act="add">追加</button>
+  <button class="btn sm" data-act="bulk">${ui.showBulk?'まとめて追加を閉じる':'まとめて追加'}</button></div>
+  ${ui.showBulk?`<label>1行1名「名前,経験数」(経験数は省略可)</label><textarea id="n-bulk" placeholder="山田,12&#10;佐藤,0&#10;鈴木,5"></textarea>
+  <button class="btn" style="margin-top:8px" data-act="addbulk">まとめて登録</button>`:''}
+  <p class="hint">経験数＝これまでのサバゲー参加回数。過去の勝敗は、このアプリを使う前の成績があれば入力(任意)。</p></div>`;
+  h+=`<div class="card"><h3>メンバー一覧(${S.members.length}人)</h3>`;
+  if(!S.members.length)h+='<div class="empty">まだメンバーがいません</div>';
+  for(const m of S.members){
+    const s=stats(m);
+    if(ui.editing===m.id){
+      h+=`<div class="mrow"><label>名前</label><input id="e-name" value="${esc(m.name)}">
+      <div class="grid3"><div><label>経験数</label><input id="e-exp" type="number" min="0" value="${m.exp}"></div>
+      <div><label>過去の勝ち</label><input id="e-w" type="number" min="0" value="${m.w0}"></div>
+      <div><label>過去の負け</label><input id="e-l" type="number" min="0" value="${m.l0}"></div></div>
+      <div class="row" style="margin-top:8px"><button class="btn pri sm" data-act="saveedit" data-id="${m.id}">保存</button><button class="btn sm" data-act="canceledit">キャンセル</button></div></div>`;
+      continue;
+    }
+    const armed=ui.arm==='del'+m.id;
+    h+=`<div class="mrow"><div class="row"><div class="mname">${esc(m.name)}<span class="badge">実力 ${Math.round(rf(m))}</span>${isBeg(m)?'<span class="badge beg">初心者</span>':''}</div></div>
+    <div class="sub">経験 ${m.exp}回 ／ ${s.w}勝 ${s.l}敗${s.d?' '+s.d+'分':''}</div>
+    <div class="row" style="margin-top:6px">
+      <button class="btn sm" data-act="expd" data-id="${m.id}">経験 −1</button>
+      <button class="btn sm" data-act="expu" data-id="${m.id}">経験 ＋1</button>
+      <span class="spacer"></span>
+      <button class="btn sm" data-act="edit" data-id="${m.id}">編集</button>
+      <button class="btn sm danger ${armed?'armed':''}" data-act="del" data-id="${m.id}">${armed?'本当に削除':'削除'}</button>
+    </div></div>`;
+  }
+  return h+'</div>';
+}
+
+/* --- teams tab --- */
+function vTeams(){
+  const att=S.members.filter(m=>m.on);
+  let h=`<div class="card"><div class="row"><h3 style="margin:0">参加者(${att.length}/${S.members.length}人)</h3><span class="spacer"></span>
+  <button class="btn sm" data-act="allon">全員</button><button class="btn sm" data-act="alloff">解除</button></div>`;
+  h+=S.members.length?`<div class="chips" style="margin-top:10px">${S.members.map(m=>`<button class="chip ${m.on?'on':''}" data-act="toggle" data-id="${m.id}">${esc(m.name)}</button>`).join('')}</div>`
+    :'<div class="empty">先に「メンバー」タブで登録してください</div>';
+  h+=`</div>
+  <div class="card"><h3>バランス設定</h3>
+  <label>チーム数</label><div class="seg">${[2,3,4].map(n=>`<button class="${S.teamCount===n?'on':''}" data-act="tc" data-v="${n}">${n}チーム</button>`).join('')}</div>
+  <label>実力値の重み：経験 ${Math.round(S.weight*100)}% ／ 勝率 ${100-Math.round(S.weight*100)}%</label>
+  <input type="range" min="0" max="100" step="10" value="${Math.round(S.weight*100)}" data-chg="weight">
+  <div class="rl"><span>勝率重視</span><span>経験重視</span></div>
+  <label>初心者とみなす経験数(以下)：各チームに均等に振り分け</label>
+  <input type="number" min="0" value="${S.begMax}" data-chg="beg" style="max-width:120px">
+  <button class="btn pri full" style="margin-top:12px" data-act="split" ${att.length<S.teamCount?'disabled':''}>${S.teams?'🔄 再抽選してチーム分け':'🎲 チーム分けする'}</button>
+  ${att.length<S.teamCount?`<p class="hint">参加者が${S.teamCount}人以上必要です</p>`:''}</div>`;
+  if(S.teams){
+    const sets=S.teams.sets;
+    const sums=sets.map(t=>t.reduce((a,id)=>a+(byId(id)?rf(byId(id)):0),0));
+    sets.forEach((t,i)=>{
+      const ms=t.map(byId).filter(Boolean);
+      const avg=ms.length?sums[i]/ms.length:0;
+      h+=`<div class="team"><div class="th" style="background:${TC[i]}"><span>${TN[i]}（${ms.length}人）</span><small>平均実力 ${avg.toFixed(1)} ／ 初心者 ${ms.filter(isBeg).length}人</small></div>
+      <div class="tb">${ms.map(m=>`<button class="pm ${isBeg(m)?'beg':''}" data-act="move" data-id="${m.id}" data-t="${i}">${esc(m.name)}<span>実力${Math.round(rf(m))}・経験${m.exp}</span></button>`).join('')||'<span class="sub">なし</span>'}</div></div>`;
+    });
+    h+='<p class="hint" style="margin:-4px 2px 12px">メンバーをタップすると次のチームへ移動します(手動調整)。</p>';
+    h+=`<div class="card"><h3>勝敗登録（第${S.history.length+1}試合）</h3>`;
+    if(S.teams.recorded){
+      h+=`<p class="sub" style="margin:0 0 10px">登録済みです。次の試合に進みましょう。</p>
+      <div class="row"><button class="btn" data-act="keep">同じチームで続ける</button><button class="btn pri" data-act="split">再抽選して次へ</button></div>`;
+    }else{
+      h+=`<div class="row">${sets.map((_,i)=>`<button class="btn" style="background:${TC[i]};border-color:${TC[i]};color:#fff;flex:1" data-act="win" data-v="${i}">🏆 ${TN[i]}</button>`).join('')}</div>
+      <button class="btn full" style="margin-top:8px" data-act="win" data-v="-1">引き分け</button>`;
+    }
+    h+='</div>';
+  }
+  return h;
+}
+
+/* --- record tab --- */
+function vRecord(){
+  const rows=S.members.map(m=>({m,s:stats(m),r:rf(m)}));
+  const wrOf=x=>(x.s.w+x.s.l)?x.s.w/(x.s.w+x.s.l):-1;
+  const sorters={wins:(a,b)=>b.s.w-a.s.w||wrOf(b)-wrOf(a),rate:(a,b)=>wrOf(b)-wrOf(a)||b.s.w-a.s.w,rating:(a,b)=>b.r-a.r,exp:(a,b)=>b.m.exp-a.m.exp};
+  rows.sort(sorters[ui.sort]);
+  let h=`<div class="card"><div class="row"><h3 style="margin:0">ランキング</h3><span class="spacer"></span>
+  <select data-chg="sort" style="width:auto;font-size:14px;padding:6px"><option value="wins" ${ui.sort==='wins'?'selected':''}>勝数順</option><option value="rate" ${ui.sort==='rate'?'selected':''}>勝率順</option><option value="rating" ${ui.sort==='rating'?'selected':''}>実力値順</option><option value="exp" ${ui.sort==='exp'?'selected':''}>経験数順</option></select></div>`;
+  if(!rows.length)h+='<div class="empty">メンバーがいません</div>';
+  else h+=`<div class="scroll"><table class="rank"><tr><th>名前</th><th>試合</th><th>勝</th><th>負</th><th>分</th><th>勝率</th><th>経験</th><th>実力</th></tr>
+  ${rows.map(x=>{const w=wrOf(x);return `<tr><td>${esc(x.m.name)}</td><td>${x.s.g}</td><td>${x.s.w}</td><td>${x.s.l}</td><td>${x.s.d}</td><td>${w<0?'-':Math.round(w*100)+'%'}</td><td>${x.m.exp}</td><td>${Math.round(x.r)}</td></tr>`;}).join('')}</table></div>`;
+  h+='</div><div class="card"><h3>試合履歴</h3>';
+  if(!S.history.length)h+='<div class="empty">まだ試合結果がありません</div>';
+  const nm=id=>byId(id)?esc(byId(id).name):'(削除済み)';
+  [...S.history].reverse().forEach(x=>{
+    const no=S.history.indexOf(x)+1;
+    const d=new Date(x.ts).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const armed=ui.arm==='h'+x.id;
+    h+=`<div class="hist"><div class="row"><b>第${no}試合</b><span class="sub">${d}</span><span class="spacer"></span>
+    <button class="btn sm danger ${armed?'armed':''}" data-act="delh" data-id="${x.id}">${armed?'本当に削除':'削除'}</button></div>
+    ${x.teams.map((t,i)=>`<div class="hl ${x.winner===i?'win':''}"><b style="color:${TC[i]}">${x.winner===i?'🏆 ':''}${TN[i]}</b>${t.map(nm).join('、')}</div>`).join('')}
+    ${x.winner===-1?'<div class="hl sub">結果：引き分け</div>':''}</div>`;
+  });
+  return h+'</div>';
+}
+
+/* --- data tab --- */
+function vData(){
+  return `<div class="card"><h3>バックアップ(書き出し)</h3>
+  <p class="hint" style="margin:0 0 8px">端末のブラウザに自動保存されます。別の端末へ移す・念のための保存には、書き出したテキストを控えてください。</p>
+  <button class="btn" data-act="export">書き出す</button> ${ui.exportText?'<button class="btn" data-act="copy">コピー</button>':''}
+  ${ui.exportText?`<textarea id="x-text" readonly style="margin-top:8px">${esc(ui.exportText)}</textarea>`:''}</div>
+  <div class="card"><h3>バックアップ(読み込み)</h3>
+  <textarea id="i-text" placeholder="書き出したテキストを貼り付け">${esc(ui.importText)}</textarea>
+  <button class="btn" style="margin-top:8px" data-act="import">読み込む(現在のデータは上書き)</button></div>
+  <div class="card"><h3>戦績だけリセット</h3><p class="hint" style="margin:0 0 8px">試合履歴を全て消去します。メンバーと経験数、過去の勝敗はそのまま残ります。</p>
+  <button class="btn danger ${ui.arm==='rh'?'armed':''}" data-act="resethist">${ui.arm==='rh'?'本当に消去する':'試合履歴を消去'}</button></div>
+  <div class="card"><h3>実力値の計算方法</h3><p class="hint" style="margin:0">経験数(50回で上限)と勝率(試合が少ない人は50%寄りに補正)を、設定した重みで混ぜた0〜100の値です。チーム分けでは、各チームの合計実力値と初心者の人数が揃うよう、ランダムな組み合わせの中から最も均等な案を選びます。</p></div>`;
+}
+
+/* ---------- actions ---------- */
+function addMember(name,exp,w,l){
+  name=name.trim();if(!name)return false;
+  S.members.push({id:S.nextId++,name,exp,w0:w,l0:l,on:true});return true;
+}
+const A={
+  tab(el){ui.tab=el.dataset.v;ui.arm=null;ui.editing=null;},
+  add(){
+    if(!addMember($('#n-name').value,num($('#n-exp').value),num($('#n-w').value),num($('#n-l').value))){return toast('名前を入力してください');}
+    save();toast('追加しました');
+  },
+  bulk(){ui.showBulk=!ui.showBulk;},
+  addbulk(){
+    const lines=$('#n-bulk').value.split('\n');let c=0;
+    for(const ln of lines){const [n,e]=ln.split(/[,、，\t]/);if(n&&addMember(n,num(e),0,0))c++;}
+    save();ui.showBulk=false;toast(c+'人を追加しました');
+  },
+  expd(el){const m=byId(+el.dataset.id);m.exp=Math.max(0,m.exp-1);save();},
+  expu(el){byId(+el.dataset.id).exp++;save();},
+  edit(el){ui.editing=+el.dataset.id;},
+  canceledit(){ui.editing=null;},
+  saveedit(el){
+    const m=byId(+el.dataset.id),n=$('#e-name').value.trim();
+    if(!n)return toast('名前を入力してください');
+    m.name=n;m.exp=num($('#e-exp').value);m.w0=num($('#e-w').value);m.l0=num($('#e-l').value);
+    ui.editing=null;save();
+  },
+  del(el){
+    const k='del'+el.dataset.id;
+    if(ui.arm!==k){ui.arm=k;return;}
+    const id=+el.dataset.id;
+    S.members=S.members.filter(m=>m.id!==id);
+    if(S.teams)S.teams.sets=S.teams.sets.map(t=>t.filter(x=>x!==id));
+    ui.arm=null;save();
+  },
+  toggle(el){const m=byId(+el.dataset.id);m.on=!m.on;save();},
+  allon(){S.members.forEach(m=>m.on=true);save();},
+  alloff(){S.members.forEach(m=>m.on=false);save();},
+  tc(el){S.teamCount=+el.dataset.v;save();},
+  split(){
+    const ids=S.members.filter(m=>m.on).map(m=>m.id);
+    if(ids.length<S.teamCount)return;
+    S.teams={sets:split(ids,S.teamCount),recorded:false};save();
+  },
+  move(el){
+    if(!S.teams)return;
+    const id=+el.dataset.id,t=+el.dataset.t,n=S.teams.sets.length;
+    S.teams.sets[t]=S.teams.sets[t].filter(x=>x!==id);
+    S.teams.sets[(t+1)%n].push(id);
+    S.teams.recorded=false;save();
+  },
+  win(el){
+    if(!S.teams||S.teams.recorded)return;
+    const w=+el.dataset.v;
+    S.history.push({id:S.nextId++,ts:Date.now(),teams:S.teams.sets.map(t=>[...t]),winner:w});
+    S.teams.recorded=true;save();
+    toast(w<0?'引き分けで登録しました':TN[w]+'の勝ちで登録しました');
+  },
+  keep(){S.teams.recorded=false;save();},
+  delh(el){
+    const k='h'+el.dataset.id;
+    if(ui.arm!==k){ui.arm=k;return;}
+    S.history=S.history.filter(h=>h.id!==+el.dataset.id);ui.arm=null;save();
+  },
+  export(){ui.exportText=JSON.stringify(S);},
+  copy(){
+    const t=$('#x-text');
+    try{navigator.clipboard.writeText(ui.exportText).then(()=>toast('コピーしました'),()=>{t.select();toast('選択しました。長押しでコピー');});}
+    catch(e){t.select();toast('選択しました。長押しでコピー');}
+    return 'norender';
+  },
+  import(){
+    const txt=$('#i-text').value;ui.importText=txt;
+    try{
+      const d=JSON.parse(txt);
+      if(!Array.isArray(d.members)||!Array.isArray(d.history))throw 0;
+      S=Object.assign(def(),d);save();ui.importText='';toast('読み込みました');
+    }catch(e){toast('読み込めませんでした');}
+    return 'norender';
+  },
+  resethist(){
+    if(ui.arm!=='rh'){ui.arm='rh';return;}
+    S.history=[];if(S.teams)S.teams.recorded=false;ui.arm=null;save();toast('履歴を消去しました');return 'norender';
+  }
+};
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');if(!el)return;
+  const keep=ui.arm;
+  const r=A[el.dataset.act](el);
+  if(r==='norender')return;
+  if(el.dataset.act!=='del'&&el.dataset.act!=='delh'&&el.dataset.act!=='resethist')ui.arm=null;
+  render();
+});
+document.addEventListener('change',e=>{
+  const el=e.target.closest('[data-chg]');if(!el)return;
+  const k=el.dataset.chg;
+  if(k==='weight')S.weight=(+el.value)/100;
+  else if(k==='beg')S.begMax=num(el.value,3);
+  else if(k==='sort')ui.sort=el.value;
+  save();render();
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.id==='n-name'){A.add();}
+});
+render();
+if("serviceWorker" in navigator&&location.protocol.startsWith("http")){navigator.serviceWorker.register("sw.js").catch(()=>{});}
+})();
+</script>
+</body>
+</html>
